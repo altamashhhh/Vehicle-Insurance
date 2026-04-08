@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from starlette.responses import HTMLResponse, RedirectResponse
+from starlette.responses import HTMLResponse as StarletteHTMLResponse
 from uvicorn import run as app_run
 
 from typing import Optional
@@ -78,8 +78,10 @@ async def index(request: Request):
     """
     Renders the main HTML form page for vehicle data input.
     """
-    return templates.TemplateResponse(
-            "vehicledata.html",{"request": request, "context": "Rendering"})
+    # Read HTML file directly
+    with open("templates/vehicledata.html", "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content, status_code=200)
 
 # Route to trigger the model training process
 @app.get("/train")
@@ -131,11 +133,17 @@ async def predictRouteClient(request: Request):
         # Interpret the prediction result as 'Response-Yes' or 'Response-No'
         status = "Response-Yes" if value == 1 else "Response-No"
 
-        # Render the same HTML page with the prediction result
-        return templates.TemplateResponse(
-            "vehicledata.html",
-            {"request": request, "context": status},
-        )
+        # Read HTML file directly
+        with open("templates/vehicledata.html", "r") as f:
+            html_content = f.read()
+        
+        # Inject the result into HTML
+        result_html = f'<div class="result"><h2>Prediction Result: {status}</h2></div>'
+        
+        # Add result before closing body
+        html_content = html_content.replace('</body>', f'{result_html}</body>')
+        
+        return HTMLResponse(content=html_content, status_code=200)
         
     except Exception as e:
         return {"status": False, "error": f"{e}"}
