@@ -57,8 +57,8 @@ class DataForm:
 @app.get("/", tags=["authentication"])
 async def index(request: Request):
     return templates.TemplateResponse(
-        name="vehicledata.html",
-        context={"request": request, "context": None}
+        "vehicledata.html",
+        {"request": request, "context": None}
     )
 
 @app.get("/train")
@@ -93,8 +93,8 @@ async def predictRouteClient(request: Request):
         value = model_predictor.predict(dataframe=vehicle_df)[0]
         status = "Response-Yes" if value == 1 else "Response-No"
         return templates.TemplateResponse(
-            name="vehicledata.html",
-            context={"request": request, "context": status}
+            "vehicledata.html",
+            {"request": request, "context": status}
         )
     except Exception as e:
         return {"status": False, "error": f"{e}"}
