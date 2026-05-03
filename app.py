@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from uvicorn import run as app_run
@@ -56,10 +56,9 @@ class DataForm:
 
 @app.get("/", tags=["authentication"])
 async def index(request: Request):
-    return templates.TemplateResponse(
-        "vehicledata.html",
-        {"request": request, "context": None}
-    )
+    template = templates.get_template("vehicledata.html")
+    html = template.render(context=None)
+    return HTMLResponse(content=html)
 
 @app.get("/train")
 async def trainRouteClient():
@@ -92,10 +91,9 @@ async def predictRouteClient(request: Request):
         model_predictor = VehicleDataClassifier()
         value = model_predictor.predict(dataframe=vehicle_df)[0]
         status = "Response-Yes" if value == 1 else "Response-No"
-        return templates.TemplateResponse(
-            "vehicledata.html",
-            {"request": request, "context": status}
-        )
+        template = templates.get_template("vehicledata.html")
+        html = template.render(context=status)
+        return HTMLResponse(content=html)
     except Exception as e:
         return {"status": False, "error": f"{e}"}
 
